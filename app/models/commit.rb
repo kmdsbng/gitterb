@@ -74,7 +74,7 @@ class Commit
   end
 
   def stats
-    @stats ||= Grit::CommitStats.find_all(repo.repo, id, options = {:m => true, :max_count => 1}).first.last
+    @stats ||= Grit::CommitStats.find_all(repo.repo, id, {:m => true, :max_count => 1}).first.last
   end
 
 
@@ -90,6 +90,8 @@ class Commit
   end
 
   def to_node(node_size = 100)
+    label = "#{short_id}\n#{ellipsis(message)}"
+
     { :id => short_id,
       :sha_1 => id,
       :shape => "ELLIPSE",
@@ -98,11 +100,16 @@ class Commit
       :labelFontColor => "#2D2D2D",
       :size => node_size,
       :fontsize => 20,
-      :label => short_id,
+      :label => label,
       :anchor => "center",
       :v_anchor => "middle",
       :tips => commit_log
     }
+  end
+
+  def ellipsis(message, len=8)
+    m = message.force_encoding('utf-8').gsub(/"/, "”") rescue message
+    m = m.length > len ? "#{m.to_s[0...len-2]}.." : m
   end
 
   def diffs
